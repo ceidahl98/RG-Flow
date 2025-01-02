@@ -9,13 +9,20 @@ from .swish import Swish
 
 
 class ResNet(nn.Module):
-    def __init__(self, num_res_blocks, widths, final_scale, final_tanh):
+    def __init__(self, num_res_blocks, widths, final_scale, final_tanh, use_attention=True, num_heads=4):
         assert widths[0] == widths[-1]
 
         super().__init__()
+        self.use_attention = use_attention
 
         self.res_blocks = nn.ModuleList(
-            [self.build_res_block(widths) for _ in range(num_res_blocks)])
+            [self.build_res_block(widths) for _ in range(num_res_blocks)]
+        )
+
+        if self.use_attention:
+            self.attention_layers = nn.ModuleList(
+                [self.build_attention(widths[0], num_heads) for _ in range(num_res_blocks)]
+            )
 
         if final_scale:
             self.scale = Scale(widths[-1])
@@ -43,15 +50,28 @@ class ResNet(nn.Module):
             layers.append(self.build_linear(widths[i], widths[i + 1]))
         return nn.Sequential(*layers)
 
+    def build_attention(self, embed_dim, num_heads):
+        # Multihead attention layer
+        return nn.MultiheadAttention(embed_dim=embed_dim, num_heads=num_heads, batch_first=True)
+
     def forward(self, x):
-        for res_block in self.res_blocks:
-            x = (x + res_block(x)) / sqrt(2)
+        for i, res_block in enumerate(self.res_blocks):
+            # Residual block
+            res_out = res_block(x)
+            x = (x + res_out) / sqrt(2)
+
+            # Attention layer (if enabled)
+            if self.use_attention:
+                # Add a sequence dimension for attention
+                x_seq = x.unsqueeze(1)  # Add sequence dimension
+                x, _ = self.attention_layers[i](x_seq, x_seq, x_seq)
+                x = x.squeeze(1)  # Remove sequence dimension
+
         if self.scale:
             x = self.scale(x)
         if self.tanh:
             x = self.tanh(x)
         return x
-
 
 class ResNetReshape(ResNet):
     def __init__(self, *args, **kwargs):

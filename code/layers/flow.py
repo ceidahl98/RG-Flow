@@ -23,6 +23,8 @@ class Flow(nn.Module):
 
     def log_prob(self, x):
         z, logp = self.forward(x)
+        #print(z.min(),"z_min", z.max(),"z_max")
         if self.prior is not None:
             logp = logp + self.prior.log_prob(z)
+
         return logp
