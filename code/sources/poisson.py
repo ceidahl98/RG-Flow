@@ -10,7 +10,9 @@ class Poisson(Source):
             'scale', torch.tensor(scale, dtype=torch.get_default_dtype()))
 
         self.register_buffer(
-            'rate', torch.tensor(10,dtype=torch.get_default_dtype())
+
+            'rate', torch.tensor(5,dtype=torch.get_default_dtype())
+
         )
 
 
