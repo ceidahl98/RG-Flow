@@ -11,6 +11,7 @@ def dispatch(i, j, x):
 
 def collect(i, j, x, x_):
     x = x.clone()
+    print(i.shape,"ISHAPE")
     x[:, :, i, j] = x_.reshape(x.shape[0], x.shape[1], i.shape[0], i.shape[1])
     return x
 
@@ -24,6 +25,7 @@ def stackRGblock(x):
     K = int(sqrt(KK))
     x = x.permute(0, 2, 1, 3)
     x = x.reshape(-1, C, K, K)
+
     return x
 
 

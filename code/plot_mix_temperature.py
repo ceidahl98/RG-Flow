@@ -6,8 +6,6 @@ import numpy as np
 import torch
 from matplotlib import pyplot as plt
 from torch.distributions.laplace import Laplace
-from torch.distributions.poisson import Poisson
-
 
 import utils
 from args import args
@@ -20,21 +18,14 @@ level_cutoff = 1    # Cutoff level (\lambda in the paper)
 
 def main():
     flow = build_mera()
-    print(flow)
-    # last_epoch = utils.get_last_checkpoint_step()
-    # utils.load_checkpoint(last_epoch, flow)
-    state_dict = \
-    torch.load('./20.state', map_location=args.device)[
-        'flow']
-    flow.load_state_dict(state_dict)
+    last_epoch = utils.get_last_checkpoint_step()
+    utils.load_checkpoint(last_epoch, flow)
     flow.train(False)
 
     shape = (16, args.nchannels, args.L, args.L)
-    #prior_low = Laplace(torch.tensor(0.), torch.tensor(T_low / sqrt(2)))
-    prior_low = Poisson(torch.tensor(100.0))
+    prior_low = Laplace(torch.tensor(0.), torch.tensor(T_low / sqrt(2)))
     z = prior_low.sample(shape)
-    #prior_high = Laplace(torch.tensor(0.), torch.tensor(T_high / sqrt(2)))
-    prior_high = Poisson(torch.tensor(100.0))
+    prior_high = Laplace(torch.tensor(0.), torch.tensor(T_high / sqrt(2)))
     z_high = prior_high.sample(shape)
     k = 2**level_cutoff
     z[:, :, ::k, ::k] = z_high[:, :, ::k, ::k]

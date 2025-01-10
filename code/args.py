@@ -37,8 +37,8 @@ group = parser.add_argument_group('network parameters')
 group.add_argument(
     '--prior',
     type=str,
-    default='laplace',
-    choices=['gaussian', 'laplace'],
+    default='poisson',
+    choices=['gaussian', 'laplace', 'poisson'],
     help='prior of latent variables',
 )
 group.add_argument(
@@ -96,7 +96,7 @@ group.add_argument(
 group.add_argument(
     '--lr',
     type=float,
-    default=1e-3,
+    default=1e-4,
     help='learning rate',
 )
 group.add_argument(

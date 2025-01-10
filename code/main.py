@@ -11,6 +11,7 @@ from torch.nn.utils import clip_grad_norm_
 
 import layers
 import sources
+
 import utils
 from args import args
 from utils import my_log
@@ -27,6 +28,8 @@ def get_prior(temperature=1):
         # Set scale = 1/sqrt(2) to make var = 1
         prior = sources.Laplace([args.nchannels, args.L, args.L],
                                 scale=temperature / sqrt(2))
+    elif args.prior == 'poisson':
+        prior = sources.Poisson([args.nchannels, args.L, args.L])
     else:
         raise ValueError(f'Unknown prior: {args.prior}')
     prior = prior.to(args.device)
@@ -162,6 +165,8 @@ def main():
     utils.print_args()
 
     flow = build_mera()
+    # state_dict = torch.load('./saved_model/celeba32/nl8,6,4,2_nr4_nm2_nh512/_5_attention/out_save/18.state',map_location=args.device)['flow']
+    # flow.load_state_dict(state_dict,strict=False)
     flow.train(True)
     my_log('nparams in each RG layer: {}'.format(
         [utils.get_nparams(layer) for layer in flow.layers]))
@@ -176,8 +181,8 @@ def main():
                                   lr=args.lr,
                                   weight_decay=args.weight_decay)
 
-    if last_epoch >= 0:
-        utils.load_checkpoint(last_epoch, flow, optimizer)
+    #if last_epoch >= 0:
+     #   utils.load_checkpoint(last_epoch, flow, optimizer)
 
     train_set, _, _ = utils.load_dataset()
     train_loader = torch.utils.data.DataLoader(train_set,
@@ -205,6 +210,11 @@ def main():
             utils.check_nan(loss_mean)
 
             loss_mean.backward()
+            # for name, param in flow.named_parameters():
+            #     if param.grad is not None:
+            #         print(f"Layer: {name}, Gradient Mean: {param.grad.mean().item()}, Std: {param.grad.std().item()}")
+            #     else:
+            #         print(f"Layer: {name} has no gradient!")
             if args.clip_grad:
                 clip_grad_norm_(params, args.clip_grad)
             optimizer.step()

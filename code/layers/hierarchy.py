@@ -4,6 +4,7 @@ import utils
 
 from .flow import Flow
 
+#add poisson dirichlet process and mappings
 
 class HierarchyBijector(Flow):
     def __init__(self, indexI, indexJ, layers, prior=None):
@@ -18,6 +19,7 @@ class HierarchyBijector(Flow):
         # dim(x) = (B, C, H, W)
         batch_size = x.shape[0]
         ldj = x.new_zeros(batch_size)
+
         for layer, indexI, indexJ in zip(self.layers, self.indexI,
                                          self.indexJ):
             x, x_ = utils.dispatch(indexI, indexJ, x)
@@ -27,8 +29,9 @@ class HierarchyBijector(Flow):
 
             x_, log_prob = layer.forward(x_)
             ldj = ldj + log_prob.view(batch_size, -1).sum(dim=1)
-
+            #print(x_.shape)
             x_ = utils.unstackRGblock(x_, batch_size)
+            print(x_.shape)
             x = utils.collect(indexI, indexJ, x, x_)
 
         return x, ldj
