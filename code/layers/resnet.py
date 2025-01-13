@@ -1,11 +1,14 @@
 from math import sqrt
-
+import torch
 from torch import nn
 from torch.nn import init
 from torch.nn.utils import weight_norm
 
 from .scale import Scale
 from .swish import Swish
+
+
+
 
 
 class ResNet(nn.Module):
@@ -71,6 +74,7 @@ class ResNet(nn.Module):
             x = self.scale(x)
         if self.tanh:
             x = self.tanh(x)
+
         return x
 
 class ResNetReshape(ResNet):

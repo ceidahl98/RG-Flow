@@ -11,7 +11,7 @@ class Poisson(Source):
 
         self.register_buffer(
 
-            'rate', torch.tensor(5,dtype=torch.get_default_dtype())
+            'rate', torch.tensor(10.0,dtype=torch.get_default_dtype())
 
         )
 
@@ -37,8 +37,8 @@ class Poisson(Source):
     def log_prob(self, count):
 
         rate = self.rate
-        count = nn.functional.relu(count)
-        count = torch.clamp(count,max=10*rate)
+        # count = nn.functional.relu(count)
+        # count = torch.clamp(count,max=10*rate)
         print(count.min(),"count_min",count.max(),"count_max")
         log_prob = count * torch.log(rate) - rate - torch.lgamma(count + 1)
         log_prob = torch.sum(log_prob.view(log_prob.shape[0],-1),dim=1)

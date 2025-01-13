@@ -1,17 +1,19 @@
 from math import sqrt
-
+import torch
 
 def dispatch(i, j, x):
     # i, j are indices of elements being processed
     # dim(i) = (num_RG_blocks, K*K)
     # dim(x_) = (B, C, num_RG_blocks, K*K)
     x_ = x[:, :, i, j].reshape(x.shape[0], x.shape[1], i.shape[0], i.shape[1])
+
+
     return x, x_
 
 
 def collect(i, j, x, x_):
     x = x.clone()
-    print(i.shape,"ISHAPE")
+
     x[:, :, i, j] = x_.reshape(x.shape[0], x.shape[1], i.shape[0], i.shape[1])
     return x
 

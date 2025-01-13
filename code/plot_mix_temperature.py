@@ -18,8 +18,8 @@ level_cutoff = 1    # Cutoff level (\lambda in the paper)
 
 def main():
     flow = build_mera()
-    last_epoch = utils.get_last_checkpoint_step()
-    utils.load_checkpoint(last_epoch, flow)
+    #last_epoch = utils.get_last_checkpoint_step()
+    #utils.load_checkpoint(last_epoch, flow)
     flow.train(False)
 
     shape = (16, args.nchannels, args.L, args.L)
